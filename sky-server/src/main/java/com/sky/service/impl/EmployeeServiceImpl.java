@@ -1,7 +1,7 @@
 package com.sky.service.impl;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import com.sky.constant.MessageConstant;
 import com.sky.constant.PasswordConstant;
 import com.sky.constant.StatusConstant;
@@ -17,15 +17,12 @@ import com.sky.mapper.EmployeeMapper;
 import com.sky.result.PageResult;
 import com.sky.service.EmployeeService;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
 import java.time.LocalDateTime;
-import java.util.Map;
 
 @Slf4j
 @Service
@@ -101,10 +98,9 @@ public class EmployeeServiceImpl implements EmployeeService {
     public PageResult pageQuery(EmployeePageQueryDTO employeePageQueryDTO) {
         int page = employeePageQueryDTO.getPage();
         int pageSize = employeePageQueryDTO.getPageSize();
-        String name = employeePageQueryDTO.getName();
-        Page<Employee> pageParams = new Page<>(page, pageSize);
-        IPage<Employee> dialogIPage = employeeMapper.selectPageByEmpName(pageParams, name);
-        return new PageResult(dialogIPage.getTotal(), dialogIPage.getRecords());
+        PageHelper.startPage(page, pageSize);
+        Page<Employee> pageQuery = employeeMapper.pageQuery(employeePageQueryDTO);
+        return new PageResult(pageQuery.getTotal(), pageQuery.getResult());
     }
 
 }
