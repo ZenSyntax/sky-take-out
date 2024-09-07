@@ -75,15 +75,8 @@ public class EmployeeServiceImpl implements EmployeeService {
         Employee employee = new Employee();
         // 对象属性拷贝 从employeeDTO拷贝到employee
         BeanUtils.copyProperties(employeeDTO, employee);
-        //
         //设置其他属性值
         employee.setStatus(StatusConstant.ENABLE);
-        employee.setCreateTime(LocalDateTime.now());
-        employee.setUpdateTime(LocalDateTime.now());
-        Long id = BaseContext.getCurrentId();
-        log.info("id为：{}", id);
-        employee.setCreateUser(id);
-        employee.setUpdateUser(id);
         employee.setPassword(DigestUtils.md5DigestAsHex(PasswordConstant.DEFAULT_PASSWORD.getBytes()));
         //调用持久层插入数据
         employeeMapper.insert(employee);
@@ -138,8 +131,6 @@ public class EmployeeServiceImpl implements EmployeeService {
         Employee employee = new Employee();
         // 对象属性拷贝 从employeeDTO拷贝到employee
         BeanUtils.copyProperties(employeeDTO, employee);
-        employee.setUpdateTime(LocalDateTime.now());
-        employee.setUpdateUser(BaseContext.getCurrentId());
         //更新内容
         employeeMapper.update(employee);
     }
