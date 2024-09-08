@@ -8,6 +8,7 @@ import com.sky.service.DishService;
 import com.sky.vo.DishVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.models.auth.In;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -80,6 +81,11 @@ public class DishController {
         return Result.success(dishVO);
     }
 
+    /**
+     * 修改菜品
+     * @param dishDTO
+     * @return
+     */
     @PutMapping
     @ApiOperation("修改菜品")
     public Result updateDishWithFlavor(@RequestBody DishDTO dishDTO) {
@@ -87,4 +93,13 @@ public class DishController {
         dishService.updateDishWithFlavor(dishDTO);
         return Result.success();
     }
+
+    @GetMapping("/list")
+    @ApiOperation("根据分类id查询菜品")
+    public Result<List<DishVO>> list(@RequestParam String categoryId) {
+        log.info("查询分类{}下的所有菜品", categoryId);
+        List<DishVO> dishVOS = dishService.getDishesByIdWithFlavor(categoryId);
+        return Result.success(dishVOS);
+    }
+
 }
