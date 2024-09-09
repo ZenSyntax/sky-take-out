@@ -147,6 +147,7 @@ public class DishServiceImpl implements DishService {
      * @param dish
      * @return
      */
+    @Override
     public List<DishVO> listWithFlavor(Dish dish) {
         List<Dish> dishList = dishMapper.getByCategoryIdAndStatus(dish);
 
@@ -164,5 +165,15 @@ public class DishServiceImpl implements DishService {
         }
 
         return dishVOList;
+    }
+
+    /**
+     * 修改菜品的起售停售状态
+     * @param id
+     * @param status
+     */
+    @Override
+    public void updateDishStatus(Integer id, Integer status) {
+        dishMapper.updateDishStatus(id, status);
     }
 }
