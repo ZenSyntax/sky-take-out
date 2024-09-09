@@ -56,4 +56,16 @@ public class ShoppingCartController {
         return Result.success();
     }
 
+    /**
+     * 减少一个商品的数量
+     * @param shoppingCartDTO
+     * @return
+     */
+    @PostMapping("/sub")
+    public Result subShoppingEntity(@RequestBody ShoppingCartDTO shoppingCartDTO){
+        log.info("将要删除的购物车数据为：{}", shoppingCartDTO);
+        shoppingCartService.subShoppingCart(shoppingCartDTO);
+        return Result.success();
+    }
+
 }
