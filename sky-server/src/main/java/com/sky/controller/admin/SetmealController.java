@@ -33,7 +33,7 @@ public class SetmealController {
      * @param setmealDTO
      * @return
      */
-    @CacheEvict(cacheNames = "setmealCache", key = "setmealDTO.categoryId")//精确清理缓存数据，将
+    @CacheEvict(cacheNames = "setmealCache", key = "setmealDTO.categoryId")//精确清理缓存数据
     @PostMapping
     @ApiOperation("新增套餐")
     public Result addSetmeal(@RequestBody SetmealDTO setmealDTO) {
