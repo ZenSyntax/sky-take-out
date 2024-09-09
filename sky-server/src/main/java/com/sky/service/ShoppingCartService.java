@@ -7,7 +7,6 @@ import java.util.List;
 
 public interface ShoppingCartService {
 
-
     /**
      * 添加购物车
      * @param shoppingCartDTO
@@ -19,5 +18,7 @@ public interface ShoppingCartService {
      * @return
      */
     List<ShoppingCart> showShoppingCart();
+
+    void cleanShoppingCart();
 
 }
