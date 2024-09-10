@@ -1,18 +1,26 @@
 package com.sky.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import com.sky.constant.MessageConstant;
 import com.sky.context.BaseContext;
+import com.sky.dto.OrdersPageQueryDTO;
 import com.sky.dto.OrdersPaymentDTO;
 import com.sky.dto.OrdersSubmitDTO;
-import com.sky.entity.*;
+import com.sky.entity.AddressBook;
+import com.sky.entity.OrderDetail;
+import com.sky.entity.Orders;
+import com.sky.entity.ShoppingCart;
 import com.sky.exception.AddressBookBusinessException;
 import com.sky.exception.ShoppingCartBusinessException;
 import com.sky.mapper.*;
+import com.sky.result.PageResult;
 import com.sky.service.OrderService;
 import com.sky.utils.WeChatPayUtil;
 import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderSubmitVO;
+import com.sky.vo.OrderVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -184,4 +192,88 @@ public class OrderServiceImpl implements OrderService {
         orderMapper.update(orders);
     }
 
+    /**
+     * 查询订单具体信息
+     * @param id
+     * @return
+     */
+    @Override
+    public OrderVO getOrderInfo(Long id) {
+        OrderVO orderVO = new OrderVO();
+        //获取订单信息
+        Orders orders = orderMapper.selectByOrderId(id);
+        BeanUtils.copyProperties(orders, orderVO);
+        //将查询订单详情表
+        List<OrderDetail> orderDetails = orderDetailMapper.selectByOrderId(id);
+        orderVO.setOrderDetailList(orderDetails);
+        return orderVO;
+    }
+
+    /**
+     * 查询历史订单信息
+     * @param ordersPageQueryDTO
+     * @return
+     */
+    @Override
+    public PageResult getHistoryOrders(OrdersPageQueryDTO ordersPageQueryDTO) {
+        PageHelper.startPage(ordersPageQueryDTO.getPage(), ordersPageQueryDTO.getPageSize());
+        Long userId = BaseContext.getCurrentId();
+        ordersPageQueryDTO.setUserId(userId);
+        Page<Orders> page = orderMapper.selectOrdersByUserId(ordersPageQueryDTO);
+
+        //批量获取数据
+        List<OrderVO> orderVOList = new ArrayList<>();
+        for (Orders orders : page) {
+            OrderVO orderVO = new OrderVO();
+            BeanUtils.copyProperties(orders, orderVO);
+
+            List<OrderDetail> orderDetails = orderDetailMapper.selectByOrderId(orders.getId());
+            orderVO.setOrderDetailList(orderDetails);
+            orderVOList.add(orderVO);
+        }
+
+        return new PageResult(page.getTotal(), orderVOList);
+    }
+
+    /**
+     * 取消订单
+     * @param id
+     */
+    @Override
+    @Transactional
+    public void cancelOrder(Long id) {
+        //从orders表中删除该id对应的订单数据
+        orderMapper.cancelOrderById(id);
+    }
+
+    /**
+     * 再来一单
+     * @param id
+     */
+    @Override
+    @Transactional
+    public void repetitionOrder(Long id) {
+        Orders orders = orderMapper.selectByOrderId(id);
+        Orders newOrder = new Orders();
+        BeanUtils.copyProperties(orders, newOrder);
+        newOrder.setId(null);
+        newOrder.setOrderTime(LocalDateTime.now());
+        newOrder.setPayStatus(Orders.UN_PAID);
+        newOrder.setStatus(Orders.PENDING_PAYMENT);
+        newOrder.setNumber(String.valueOf(System.currentTimeMillis()));
+        orderMapper.insert(newOrder);
+
+        //获取所有orders的order_detail
+        List<OrderDetail> orderDetails = orderDetailMapper.selectByOrderId(id);
+        List<OrderDetail> newOrderDetails = new ArrayList<>();
+        for (OrderDetail orderDetail : orderDetails) {
+            //将id设置为null
+            orderDetail.setId(null);
+            //将对应的订单id设置为newOrderId
+            orderDetail.setOrderId(newOrder.getId());
+            newOrderDetails.add(orderDetail);
+        }
+        orderDetailMapper.insertBatch(newOrderDetails);
+
+    }
 }
