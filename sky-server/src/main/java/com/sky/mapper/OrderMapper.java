@@ -1,9 +1,11 @@
 package com.sky.mapper;
 
 import com.github.pagehelper.Page;
+import com.sky.dto.OrdersCancelDTO;
+import com.sky.dto.OrdersConfirmDTO;
 import com.sky.dto.OrdersPageQueryDTO;
+import com.sky.dto.OrdersRejectionDTO;
 import com.sky.entity.Orders;
-import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
@@ -51,11 +53,46 @@ public interface OrderMapper {
     @Select("select * from orders where id = #{id}")
     Orders selectByOrderId(Long id);
 
+    /**
+     * 分页查询订单信息
+     * @param ordersPageQueryDTO
+     * @return
+     */
     Page<Orders> selectOrdersByUserId(OrdersPageQueryDTO ordersPageQueryDTO);
 
-    @Delete("delete from orders where id = #{id}")
-    void deleteById(Long id);
-
+    /**
+     * 取消订单
+     * @param id
+     */
     @Update("update orders set status = 6 where id = #{id}")
     void cancelOrderById(Long id);
+
+    /**
+     * 统计某一状态下的订单数据
+     * @param status
+     * @return
+     */
+    @Select("select count(*) from orders where status = #{status}")
+    int selectStatusTol(Integer status);
+
+    /**
+     * 更新订单状态
+     * @param ordersConfirmDTO
+     */
+    @Update("update orders set status = #{status} where id = #{id}")
+    void updateOrderStatus(OrdersConfirmDTO ordersConfirmDTO);
+
+    /**
+     * 拒单
+     * @param ordersRejectionDTO
+     */
+    @Update("update orders set status = 7, rejection_reason = #{rejectionReason} where id = #{id}")
+    void rejection(OrdersRejectionDTO ordersRejectionDTO);
+
+    /**
+     * 管理员取消订单
+     * @param ordersCancelDTO
+     */
+    @Update("update orders set status = 6, cancel_reason = #{cancelReason}, cancel_time=now() where id = #{id}")
+    void adminCancelOrderById(OrdersCancelDTO ordersCancelDTO);
 }
