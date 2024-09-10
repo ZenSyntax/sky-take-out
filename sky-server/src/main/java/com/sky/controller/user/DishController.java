@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,7 +35,7 @@ public class DishController {
      */
     @GetMapping("/list")
     @ApiOperation("根据分类id查询菜品")
-    @CacheEvict(cacheNames = "dishCache", key = "#categoryId")
+    @Cacheable(cacheNames = "dishCache", key = "#categoryId")
     public Result<List<DishVO>> list(Long categoryId) {
         Dish dish = new Dish();
         dish.setCategoryId(categoryId);

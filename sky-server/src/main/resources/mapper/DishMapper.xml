@@ -44,7 +44,7 @@
             <if test="image != null and image != ''">image = #{image},</if>
             <if test="description != null and description != ''">description = #{description},</if>
             <if test="status != null">status = #{status},</if>
-            <if test="updateTime != null and updateTime != ''">update_time = #{updateTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
             <if test="updateUser != null">update_user = #{updateUser}</if>
         </set>
         where id = #{id}
