@@ -29,7 +29,11 @@ public class OrderController {
 
     @PostMapping("/submit")
     @ApiOperation("用户下单")
-    @CacheEvict(cacheNames = "historyOrders", allEntries = true)
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "historyOrders", allEntries = true),
+            @CacheEvict(cacheNames = "orderDetails", allEntries = true),
+            @CacheEvict(cacheNames = "orderStatistics", key = "0")
+    })
     public Result<OrderSubmitVO> submit(@RequestBody OrdersSubmitDTO ordersSubmitDTO){
         log.info("用户下单，参数为：{}", ordersSubmitDTO);
         OrderSubmitVO orderSubmitVO = orderService.submitOrder(ordersSubmitDTO);
@@ -45,7 +49,8 @@ public class OrderController {
     @ApiOperation("订单支付")
     @Caching(evict = {
             @CacheEvict(cacheNames = "historyOrders", allEntries = true),
-            @CacheEvict(cacheNames = "orderDetails", allEntries = true)
+            @CacheEvict(cacheNames = "orderDetails", allEntries = true),
+            @CacheEvict(cacheNames = "orderStatistics", key = "0")
     })
     public Result<OrderPaymentVO> payment(@RequestBody OrdersPaymentDTO ordersPaymentDTO) throws Exception {
         log.info("订单支付：{}", ordersPaymentDTO);
@@ -91,7 +96,8 @@ public class OrderController {
     @ApiOperation("取消订单")
     @Caching(evict = {
             @CacheEvict(cacheNames = "historyOrders", allEntries = true),
-            @CacheEvict(cacheNames = "orderDetails", key = "#id")
+            @CacheEvict(cacheNames = "orderDetails", key = "#id"),
+            @CacheEvict(cacheNames = "orderStatistics", key = "0")
     })
     public Result cancelOrder (@PathVariable Long id) {
         log.info("将要取消的订单id为：{}", id);
@@ -101,7 +107,11 @@ public class OrderController {
 
     @PostMapping("/repetition/{id}")
     @ApiOperation("再来一单")
-    @CacheEvict(cacheNames = "historyOrders", allEntries = true)
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "historyOrders", allEntries = true),
+            @CacheEvict(cacheNames = "orderDetails", allEntries = true),
+            @CacheEvict(cacheNames = "orderStatistics", key = "0")
+    })
     public Result repetitionOrder (@PathVariable Long id) {
         log.info("再来一单id为：{}", id);
         orderService.repetitionOrder(id);

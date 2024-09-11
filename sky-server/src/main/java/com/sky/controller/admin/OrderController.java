@@ -14,6 +14,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,6 +35,7 @@ public class OrderController {
      */
     @GetMapping("/conditionSearch")
     @ApiOperation("订单搜索")
+    @Cacheable(cacheNames = "historyOrders", key = "#ordersPageQueryDTO.status != null ? #ordersPageQueryDTO.status : 0")
     public Result<PageResult> conditionSearch(OrdersPageQueryDTO ordersPageQueryDTO) {
         log.info("将要搜索的订单信息为：{}", ordersPageQueryDTO);
         PageResult orderVO = orderService.conditionSearch(ordersPageQueryDTO);
@@ -46,6 +48,7 @@ public class OrderController {
      */
     @GetMapping("/statistics")
     @ApiOperation("订单状态数量统计")
+    @Cacheable(cacheNames = "orderStatistics", key = "0")// TODO 状态如果发生变化，这个缓存也要清除
     public Result<OrderStatisticsVO> orderStatistics() {
         log.info("检索订单统计信息");
         OrderStatisticsVO orderStatistics = orderService.orderStatistics();
@@ -59,6 +62,7 @@ public class OrderController {
      */
     @GetMapping("/details/{id}")
     @ApiOperation("查询订单详情")
+    @Cacheable(cacheNames = "orderDetail", key = "#id")
     public Result<OrderVO> orderDetails(@PathVariable Long id) {
         log.info("将要查询的订单为：{}", id);
         OrderVO vo = orderService.getOrderInfo(id);
@@ -72,6 +76,11 @@ public class OrderController {
      */
     @PutMapping("/confirm")
     @ApiOperation("接单")
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "historyOrders", allEntries = true),
+            @CacheEvict(cacheNames = "orderDetails", key = "#ordersConfirmDTO.id"),
+            @CacheEvict(cacheNames = "orderStatistics", key = "0")
+    })
     public Result confirmOrder(@RequestBody OrdersConfirmDTO ordersConfirmDTO) {
         log.info("接单：{}", ordersConfirmDTO);
         orderService.orderConfirm(ordersConfirmDTO);
@@ -85,6 +94,11 @@ public class OrderController {
      */
     @PutMapping("/rejection")
     @ApiOperation("拒单")
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "historyOrders", allEntries = true),
+            @CacheEvict(cacheNames = "orderDetails", key = "#ordersRejectionDTO.id"),
+            @CacheEvict(cacheNames = "orderStatistics", key = "0")
+    })
     public Result rejectionOrder(@RequestBody OrdersRejectionDTO ordersRejectionDTO) {
         OrdersCancelDTO ordersCancelDTO = new OrdersCancelDTO();
         ordersCancelDTO.setId(ordersRejectionDTO.getId());
@@ -103,7 +117,8 @@ public class OrderController {
     @ApiOperation("取消订单")
     @Caching(evict = {
             @CacheEvict(cacheNames = "historyOrders", allEntries = true),
-            @CacheEvict(cacheNames = "orderDetails", key = "#ordersCancelDTO.id")
+            @CacheEvict(cacheNames = "orderDetails", key = "#ordersCancelDTO.id"),
+            @CacheEvict(cacheNames = "orderStatistics", key = "0")
     })
     public Result cancelOrder (@RequestBody OrdersCancelDTO ordersCancelDTO) {
         log.info("将要取消订单：{}", ordersCancelDTO);
@@ -118,6 +133,11 @@ public class OrderController {
      */
     @PutMapping("/delivery/{id}")
     @ApiOperation("派送订单")
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "historyOrders", allEntries = true),
+            @CacheEvict(cacheNames = "orderDetails", key = "#id"),
+            @CacheEvict(cacheNames = "orderStatistics", key = "0")
+    })
     public Result deliveryOrder(@PathVariable Long id) {
         log.info("将要派送的订单：{}", id);
         orderService.deliveryOrder(id);
@@ -125,6 +145,12 @@ public class OrderController {
     }
 
     @PutMapping("/complete/{id}")
+    @ApiOperation("完成订单")
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "historyOrders", allEntries = true),
+            @CacheEvict(cacheNames = "orderDetails", key = "#id"),
+            @CacheEvict(cacheNames = "orderStatistics", key = "0")
+    })
     public Result completeOrder(@PathVariable Long id) {
         log.info("完成订单：{}", id);
         orderService.completeOrder(id);
