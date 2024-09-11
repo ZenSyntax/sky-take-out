@@ -4,6 +4,8 @@ import com.sky.entity.Orders;
 import com.sky.mapper.OrderMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -25,6 +27,11 @@ public class OrderTask {
      */
     @Scheduled(cron = "0 * * * * ?")
 //    @Scheduled(cron = "0/5 * * * * ?")
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "historyOrders", allEntries = true),
+            @CacheEvict(cacheNames = "orderDetails", allEntries = true),
+            @CacheEvict(cacheNames = "orderStatistics", key = "0")
+    })
     public void processTimeoutOrder() {
         log.info("定时处理超时订单：{}", LocalDateTime.now());
 
@@ -46,6 +53,11 @@ public class OrderTask {
      * 处理一直处于派送中状态的订单
      */
     @Scheduled(cron = "0 0 1 * * ?")//每天凌晨1点触发一次
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "historyOrders", allEntries = true),
+            @CacheEvict(cacheNames = "orderDetails", allEntries = true),
+            @CacheEvict(cacheNames = "orderStatistics", key = "0")
+    })
     public void processDeliveryOrder() {
         log.info("定时处理处于派送中的订单：{}", LocalDateTime.now());
 

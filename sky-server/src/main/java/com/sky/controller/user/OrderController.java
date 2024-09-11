@@ -105,6 +105,11 @@ public class OrderController {
         return Result.success();
     }
 
+    /**
+     * 再来一单
+     * @param id
+     * @return
+     */
     @PostMapping("/repetition/{id}")
     @ApiOperation("再来一单")
     @Caching(evict = {
@@ -117,4 +122,18 @@ public class OrderController {
         orderService.repetitionOrder(id);
         return Result.success();
     }
+
+    /**
+     * 客户催单
+     * @param id
+     * @return
+     */
+    @ApiOperation("客户催单")
+    @GetMapping("/reminder/{id}")
+    public Result reminder(@PathVariable Long id){
+        log.info("客户催单：{}", id);
+        orderService.reminder(id);
+        return Result.success();
+    }
+
 }
