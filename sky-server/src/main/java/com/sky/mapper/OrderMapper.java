@@ -11,6 +11,7 @@ import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Mapper
 public interface OrderMapper {
@@ -95,4 +96,13 @@ public interface OrderMapper {
      */
     @Update("update orders set status = 6, cancel_reason = #{cancelReason}, cancel_time=now() where id = #{id}")
     void adminCancelOrderById(OrdersCancelDTO ordersCancelDTO);
+
+    /**
+     * 根据订单状态和下单时间查询订单
+     * @param status
+     * @param orderTime
+     * @return
+     */
+    @Select("select * from orders where status = #{status} and order_time < #{orderTime}")
+    List<Orders> getByStatusAndOrderTimeLT(Integer status, LocalDateTime orderTime);
 }

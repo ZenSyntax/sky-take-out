@@ -27,7 +27,7 @@ public class OrderController {
     @Autowired
     private OrderService orderService;
 
-    // TODO 给每个接口都加上缓存注解 加入百度开放平台相关内容判断送货距离
+    // TODO 加入百度开放平台相关内容判断送货距离
     /**
      * 订单搜索
      * @param ordersPageQueryDTO
@@ -48,7 +48,7 @@ public class OrderController {
      */
     @GetMapping("/statistics")
     @ApiOperation("订单状态数量统计")
-    @Cacheable(cacheNames = "orderStatistics", key = "0")// TODO 状态如果发生变化，这个缓存也要清除
+    @Cacheable(cacheNames = "orderStatistics", key = "0")
     public Result<OrderStatisticsVO> orderStatistics() {
         log.info("检索订单统计信息");
         OrderStatisticsVO orderStatistics = orderService.orderStatistics();
